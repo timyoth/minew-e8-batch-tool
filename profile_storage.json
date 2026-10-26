@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "name": "Reversible storage: ACC off, active advertisements every 5 seconds",
+  "slots": [
+    {
+      "slot": 1,
+      "type": "preserve",
+      "require_frame": "ibeacon",
+      "interval_ms": 5000,
+      "tx_dbm": -4
+    },
+    {
+      "slot": 2,
+      "type": "disabled"
+    },
+    {
+      "slot": 5,
+      "type": "preserve",
+      "require_frame": "other",
+      "interval_ms": 5000
+    }
+  ]
+}

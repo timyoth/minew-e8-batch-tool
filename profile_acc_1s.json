@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "name": "ACC slot 2 - 1 second - minus 4 dBm",
+  "slots": [
+    {
+      "slot": 2,
+      "type": "acc",
+      "interval_ms": 1000,
+      "tx_dbm": -4
+    }
+  ]
+}

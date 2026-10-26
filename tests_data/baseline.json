@@ -1,0 +1,55 @@
+{
+  "capabilities_hex": "000600030307d8ecf0f4f8fc000400",
+  "slots": [
+    {
+      "slot": 0,
+      "interval_ms": 900,
+      "tx_dbm": 0,
+      "measured_power_hex": "e8",
+      "frame_hex": "a0ffe2c56db5dffb48d2b060d0f5a71096e000000000c5"
+    },
+    {
+      "slot": 1,
+      "interval_ms": 100,
+      "tx_dbm": -4,
+      "measured_power_hex": "e8",
+      "frame_hex": "a103"
+    },
+    {
+      "slot": 2,
+      "interval_ms": 1000,
+      "tx_dbm": 0,
+      "measured_power_hex": "e8",
+      "frame_hex": "ffff"
+    },
+    {
+      "slot": 3,
+      "interval_ms": 900,
+      "tx_dbm": 0,
+      "measured_power_hex": "e8",
+      "frame_hex": "ffff"
+    },
+    {
+      "slot": 4,
+      "interval_ms": 4000,
+      "tx_dbm": -8,
+      "measured_power_hex": "e8",
+      "frame_hex": "a108"
+    },
+    {
+      "slot": 5,
+      "interval_ms": 0,
+      "tx_dbm": 0,
+      "measured_power_hex": "e8",
+      "frame_hex": "ffff"
+    }
+  ],
+  "connection_modes": [
+    3,
+    0,
+    3,
+    3,
+    3,
+    3
+  ]
+}

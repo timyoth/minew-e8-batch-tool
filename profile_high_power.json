@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "name": "E8 test settings - both slots +4 dBm",
+  "slots": [
+    {
+      "slot": 1,
+      "type": "preserve",
+      "require_frame": "ibeacon",
+      "interval_ms": 900,
+      "tx_dbm": 4
+    },
+    {
+      "slot": 2,
+      "type": "acc",
+      "interval_ms": 100,
+      "tx_dbm": 4
+    }
+  ]
+}

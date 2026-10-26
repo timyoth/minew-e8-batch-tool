@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "name": "Temporary ACC in Slot 6",
+  "slots": [
+    {
+      "slot": 6,
+      "type": "acc",
+      "interval_ms": 1000,
+      "tx_dbm": 0
+    }
+  ]
+}

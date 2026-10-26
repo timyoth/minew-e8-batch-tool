@@ -1,0 +1,20 @@
+# Local environments and Python caches
+.venv/
+__pycache__/
+*.py[cod]
+# Local protocol bootstrap material and credentials
+sdk_bootstrap_key.bin
+.env
+.env.*
+# Field inventories, plans and transaction baselines
+results/
+*.csv
+!inventory.example.csv
+*_state.json
+*_state.*
+*_plan.json
+*_audit.json
+*.lock
+*.tmp
+# Private research and unrelated analysis
+research/

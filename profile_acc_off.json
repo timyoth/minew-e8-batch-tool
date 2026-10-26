@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "name": "Disable ACC while preserving Bluetooth configuration access",
+  "slots": [
+    {
+      "slot": 2,
+      "type": "disabled"
+    }
+  ]
+}
