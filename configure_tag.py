@@ -36,9 +36,18 @@ async def find_connectable(address,timeout):
     if device is None or not observed:raise RuntimeError('No connectable advertisement found for this tag')
     return device,observed[0]
 
+def load_bootstrap_key():
+    path=ROOT/'sdk_bootstrap_key.bin'
+    if not path.is_file():
+        raise ValueError('Missing sdk_bootstrap_key.bin beside configure_tag.py. Obtain the authorized 16-byte file from your tool maintainer; see README Installation. No tags contacted.')
+    key=path.read_bytes()
+    if len(key)!=16:
+        raise ValueError('sdk_bootstrap_key.bin must contain exactly 16 binary bytes, not a text password or hex string')
+    return key
+
 @asynccontextmanager
 async def session(address,password,discovery_timeout=15):
-    key=(ROOT/'sdk_bootstrap_key.bin').read_bytes()
+    key=load_bootstrap_key()
     await asyncio.sleep(1)  # Give Windows time to release the previous BLE session.
     d,event=await find_connectable(address,discovery_timeout)
     address_type='random' if int(event.bluetooth_address_type)==1 else 'public'

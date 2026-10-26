@@ -45,7 +45,12 @@ Other models and firmware are rejected. macOS and Linux are not supported by thi
 
 ### 1. Download the source
 
-On this repository's GitHub page, choose **Code → Download ZIP**, extract it to a writable folder, and open PowerShell in that extracted folder. Alternatively, clone the repository with Git.
+On this repository's GitHub page, choose **Code → Download ZIP**, extract it to a writable folder, and open PowerShell in that extracted folder. Alternatively, clone the repository with Git:
+
+```powershell
+git clone https://github.com/timyoth/minew-e8-batch-tool.git
+cd minew-e8-batch-tool
+```
 
 Use the folder containing `setup.cmd` and `minew.cmd`; do not run commands inside the ZIP viewer.
 
@@ -65,7 +70,7 @@ py -3.12 --version
 
 Configuration commands require an authorized **16-byte** file named `sdk_bootstrap_key.bin`, located beside `configure_tag.py`. It is a protocol bootstrap constant, **not** your tag's connection password.
 
-The public source copy intentionally omits this local file, and `setup.cmd` does not generate it. Obtain it through your authorized SDK/tool distribution before using `plan`, `apply`, `rollback`, or `recover`. Do not substitute a text password or an arbitrary key. Discovery and the offline tests can run without it.
+The public source copy intentionally omits this local file, and `setup.cmd` does not generate it. Ask the tool maintainer for the authorized bootstrap file through a private handoff before using `plan`, `apply`, `rollback`, or `recover`. Do not substitute a text password or an arbitrary key. Discovery and the offline tests can run without it. **Downloading this repository alone is not enough to configure tags.** No self-service download or extraction procedure for this file is provided here.
 
 Check that the file has the expected size without printing its contents:
 
@@ -73,6 +78,14 @@ Check that the file has the expected size without printing its contents:
 (Get-Item .\sdk_bootstrap_key.bin).Length
 # Expected: 16
 ```
+
+Run the local readiness check:
+
+```powershell
+.\minew.cmd doctor
+```
+
+It prints Python/dependency versions and checks the bootstrap file length without displaying its contents or contacting tags. Missing or malformed files return a nonzero exit code. A successful check does not validate the key contents, adapter, password or radio connection.
 
 ### 4. Prepare the tags
 
@@ -108,7 +121,7 @@ These are **illustrative addresses**. Use the real addresses from your inventory
 .\minew.cmd plan --inventory tags.csv --profile profile_acc_1s.json --default-password --output acc_plan.json
 ```
 
-Review `acc_plan.json`, especially each tag's `changes` and any errors. `plan` reads the settings without applying the profile; it selects slots while reading them.
+An existing plan file is not overwritten; use a new name for each preview. Review `acc_plan.json`, especially each tag's `changes` and any errors. `plan` reads the settings without applying the profile; it selects slots while reading them.
 
 `--default-password` uses the factory password `minew123`. **Omit that flag** to enter a different password through a hidden prompt. Passwords must be eight ASCII letters/digits. Use separate runs for tags with different passwords.
 
@@ -137,7 +150,7 @@ Without `--auto-retry`, a final failure or pending verification stops the run. F
 | `acc_state.progress.json` | Inventory-wide progress in automatic mode, including tags not attempted. |
 | `acc_plan.json` | Your pre-apply preview. |
 
-`verified` means the target was confirmed. **`pending_verify`, `failed`, and `needs_recovery` are not completed tags.** An automatic run exits with code `0` only when every selected tag is verified; unresolved entries produce a nonzero exit code.
+`verified` means a full snapshot matched the target. Changed tags are checked after reconnecting; tags that already match are confirmed in their initial session. A resumed run skips previously verified tags unless `--recheck` is supplied. **`pending_verify`, `failed`, and `needs_recovery` are not completed tags.** An automatic run exits with code `0` only when every selected tag is verified; unresolved entries produce a nonzero exit code.
 
 To resume, repeat the **same apply command with the same inventory, profile and state file**. Previously verified tags are skipped; unfinished tags are read and reconciled before another write. Keep unresolved tags in the inventory.
 
@@ -147,7 +160,7 @@ To resume, repeat the **same apply command with the same inventory, profile and 
 .\minew.cmd rollback --inventory tags.csv --profile profile_acc_1s.json --default-password --state acc_state.json
 ```
 
-Rollback uses each tag's **first original snapshot** in that state file, including all six slots and connection modes. It can overwrite changes made after that baseline was saved. Use a new state file for a new profile or a separate experiment.
+Rollback uses each tag's **first original snapshot** in that state file, including all six slots and connection modes. It can overwrite changes made after that baseline was saved. Use a new state file for a new profile or a separate experiment. State filenames must end in `.json`; their derived CSV/progress files must not collide with your inventory or profile.
 
 Rollback stops when a tag cannot be restored or lacks a saved baseline. See [Recovery and troubleshooting](docs/RECOVERY.md) for interrupted runs, partial batches, battery-startup recovery and status meanings.
 
@@ -177,11 +190,11 @@ The experimental storage profile disables ACC broadcasts and slows iBeacon and t
 - **50 tags:** ACC configuration was eventually verified on all 50; a later live scan observed both iBeacon and ACC from all 50. Retries and some physical recovery were needed.
 - **10 tags:** power changes and temporary ACC slot addition/removal passed reconnect checks.
 - **7 tags:** a partial storage trial was restored to the exact saved normal configurations and verified.
-- **44 offline regression tests:** cover validation, write ordering, connection preservation, retries, pending verification, interruption handling, rollback and current Windows advertisement handling.
+- **48 offline regression tests:** cover validation, write ordering, connection preservation, retries, pending verification, interruption handling, rollback and current Windows advertisement handling.
 
 These results are not a guarantee of zero failures or proof of a 550/600-tag deployment. The detailed [validation record](docs/VALIDATION.md) separates hardware observations from mocked tests. Full raw field logs and device inventories are not published here.
 
-Run the tests without a Bluetooth device or bootstrap key:
+Setup installs dependencies but does not contact tags. Run the tests without a Bluetooth device or bootstrap key:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s . -p "test_*.py" -v
@@ -201,7 +214,7 @@ flowchart LR
     H --> F
 ```
 
-Confirmed mismatches and incomplete writes use the saved baseline for restoration. A missing connection is never proof that a tag accepted its settings. The device guard, explicit inventory selection, durable checkpoints and reconnect checks are designed to make failures visible and recoverable; they cannot guarantee recovery from every battery, firmware or radio failure.
+Confirmed mismatches and incomplete writes attempt restoration of the pre-attempt snapshot. Explicit rollback restores the first baseline in the state file. A missing connection is never proof that a tag accepted its settings. The device guard, explicit inventory selection, durable checkpoints and reconnect checks are designed to make failures visible and recoverable; they cannot guarantee recovery from every battery, firmware or radio failure.
 
 ## Documentation
 

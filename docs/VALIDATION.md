@@ -16,7 +16,7 @@ These are observations from the development trials in September 2026, not a live
 
 ## Offline regression suite
 
-The 44 tests use mocked Bluetooth sessions and synthetic snapshots. They cover profile/inventory validation, transaction checkpoints, write ordering, connection preservation, reconnect mismatch handling, rollback, retries, interruption and current Windows advertisement selection.
+The 48 tests use mocked Bluetooth sessions and synthetic snapshots. They cover profile/inventory validation, transaction checkpoints, write ordering, connection preservation, reconnect mismatch handling, rollback, retries, interruption and current Windows advertisement selection.
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s . -p "test_*.py" -v
@@ -39,3 +39,7 @@ The scanner now reads the current callback's Windows advertisement events, check
 - Gateway packet delivery simply because a configuration readback passed.
 
 The protocol implementation should be treated as version-specific. Retain the device guard and repeat small hardware trials before broadening compatibility.
+
+## Repository usability review (26 October 2026)
+
+A fresh installation and CLI checks were performed separately from the earlier hardware trials. The review added local bootstrap diagnostics (`doctor`), output/input collision guards, refusal to overwrite plan files, and early rejection of null profile values. These changes have offline regression coverage. Fresh setup completed under Python 3.12.10; `pip check`, all 48 tests, all command help screens, six profile forward/restoration checks against the fixture, and a five-second live discovery scan passed. Missing-key diagnostics were verified. No tags were connected to or reconfigured during this review; live apply/rollback results remain the historical trials above.

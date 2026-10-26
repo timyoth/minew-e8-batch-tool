@@ -14,7 +14,7 @@
 | `inspect_tags.py` | Supporting inspection utilities; see its `--help`. |
 | `test_*.py` / `tests_data/` | Offline regression tests and synthetic fixture. |
 
-Install with `setup.cmd`, then run the suite from the repository root. Use `minew.cmd --help` and each subcommand's `--help` as the CLI reference. The public source does not include the local bootstrap key; see the installation guide before attempting configuration.
+Install with `setup.cmd`; `minew.cmd doctor` checks local prerequisites without scanning or connecting. Output-path validation runs before Bluetooth access to protect inventory/profile files from derived status exports. Then run the suite from the repository root. Use `minew.cmd --help` and each subcommand's `--help` as the CLI reference. The public source does not include the local bootstrap key; see the installation guide before attempting configuration.
 
 ## Transaction model
 

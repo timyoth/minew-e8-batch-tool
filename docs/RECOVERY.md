@@ -8,7 +8,7 @@ Keep the original inventory, profile and state JSON together. The state file is 
 
 | Status | Meaning / next action |
 |---|---|
-| `verified` | Full target confirmed. Ordinary resume skips this tag. |
+| `verified` | Full target confirmed. Changed tags reconnect; already-matching tags need one session. Ordinary resume skips this tag. |
 | `pending_verify` | Writes read back correctly, but a fresh connection could not confirm them. Resume to read before writing again. |
 | `applying` | A durable checkpoint exists; the previous process may have stopped during a write. Resume with the same state. |
 | `failed` | Inspect the error. `rollback_verified=true` means restoration was verified, not that the requested profile succeeded. |
@@ -72,3 +72,5 @@ Recovery watches for a current connectable advertisement from only that MAC, the
 | Lock in use | Check for another running process. Do not run simultaneous jobs against the same tags. |
 
 A disabled slot can legitimately contain a zero interval internally. Zero is not a valid active advertising interval. The writer uses a specific disable/enable order and connection preservation rules; bypassing those rules with raw characteristic writes is outside this tool's supported workflow.
+
+Output filenames are checked before connecting. Use `.json` for state and a different base name from your inventory (for example, `tags.csv` with `acc_state.json`, not `tags.json`). An existing plan is retained; choose a fresh `--output` for another preview. Run `minew.cmd doctor` to check local prerequisites without contacting tags.

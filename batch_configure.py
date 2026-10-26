@@ -33,6 +33,40 @@ def inventory(path):
     if not addresses: raise ValueError('No enabled tags. Mark intended inventory rows enabled=yes.')
     return addresses
 
+def validate_paths(args):
+    """Reject output/input collisions before opening Bluetooth or a ledger."""
+    if args.command in ('scan','doctor'):
+        return
+    inputs={Path(args.inventory).resolve(),Path(args.profile).resolve()}
+    if args.command=='plan':
+        output=Path(args.output).resolve()
+        outputs=[output,output.with_name(output.name+'.tmp')]
+    else:
+        state=Path(args.state).resolve()
+        if state.suffix.lower()!='.json':
+            raise ValueError('--state must end in .json; CSV is reserved for the status export')
+        outputs=[state,state.with_suffix('.csv'),state.with_suffix('.progress.json'),
+                 state.with_suffix(state.suffix+'.lock'),state.with_name(state.name+'.tmp')]
+    if any(path in inputs for path in outputs):
+        raise ValueError('Output files must not overwrite the inventory or profile; choose a different output/state filename')
+    if args.command=='plan' and Path(args.output).exists():
+        raise ValueError('Plan output already exists; choose another --output path')
+
+def doctor():
+    """Local readiness checks only: no scan, connection or tag writes."""
+    from configure_tag import load_bootstrap_key
+    from importlib.metadata import version
+    print('Python:',sys.version.split()[0])
+    print('Platform:',sys.platform)
+    for package in ('bleak','cryptography'):
+        print(f'{package}: {version(package)}')
+    if sys.platform!='win32':
+        raise RuntimeError('This tool requires Windows')
+    load_bootstrap_key()
+    print('Bootstrap file: valid length (16 bytes); contents not displayed')
+    print('Local prerequisites passed. Bluetooth availability, password and tag compatibility still require a live connection.')
+    return 0
+
 class Store:
     """Durable per-tag transactions with an OS-released single-process lock."""
     def __init__(self,path,profile):
@@ -205,6 +239,7 @@ async def scan(args):
     print('Mark only your intended tags enabled=yes before applying. Discovery alone does not establish ownership/model.')
 
 async def run(args,password=None):
+    validate_paths(args)
     if args.command=='scan': return await scan(args)
     profile=validate_profile(json.loads(Path(args.profile).read_text(encoding='utf-8-sig')))
     addresses=inventory(args.inventory)
@@ -258,6 +293,7 @@ async def run(args,password=None):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='command',required=True)
+    sub.add_parser('doctor',help='Check local prerequisites without contacting tags')
     p=sub.add_parser('scan',help='Export a candidate MAC inventory')
     p.add_argument('--output',default='inventory.csv'); p.add_argument('--seconds',type=int,choices=range(1,61),default=15)
     for command in ['plan','apply','rollback','recover']:
@@ -276,6 +312,14 @@ def main():
             p.add_argument('--address',required=True,type=mac,help='One MAC from the inventory; other tags are not processed')
             p.add_argument('--startup-seconds',type=int,choices=range(30,601),metavar='SECONDS',default=300)
     args=parser.parse_args(); password=None
+    try:
+        if args.command=='doctor':return doctor()
+        validate_paths(args)
+        if args.command!='scan':
+            from configure_tag import load_bootstrap_key
+            load_bootstrap_key()
+    except Exception as exc:
+        print(f'{type(exc).__name__}: {exc}',file=sys.stderr); return 1
     if args.command!='scan':
         password='minew123' if args.default_password else getpass.getpass('Tag password (not saved): ')
         if len(password)!=8 or not password.isascii() or not password.isalnum(): parser.error('Password must be eight ASCII letters/digits')

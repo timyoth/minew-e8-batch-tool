@@ -23,6 +23,8 @@ def validate_profile(profile):
         kind=rule.get('type','preserve')
         if kind not in ('preserve','acc','disabled'): raise ValueError('type must be preserve, acc or disabled')
         if rule.get('require_frame') not in (None,'ibeacon','acc','disabled','other'): raise ValueError('Unknown required frame')
+        if any(k in rule and rule[k] is None for k in ('interval_ms','tx_dbm')):
+            raise ValueError('Omit unused interval_ms/tx_dbm fields; null is not a setting')
         interval=rule.get('interval_ms')
         if interval is not None and (type(interval)!=int or not 100<=interval<=5000): raise ValueError('interval_ms must be an integer from 100 to 5000')
         power=rule.get('tx_dbm')
